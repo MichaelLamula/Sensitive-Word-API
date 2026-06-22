@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sensitivewords_db
+    username: postgres
+    password: Mike@1998
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  mvc:
+    log-request-details: true
+
+server:
+  port: 8080
+
+aggregation:
+  enabled: true
+
+debug: true
