@@ -23,7 +23,6 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final CustomUserDetailsService customUserDetailsService;
 
-    // Define a whitelist for public endpoints, including all necessary Swagger paths
     private static final String[] PUBLIC_WHITELIST = {
             "/api/v1/auth/**",
             "/v3/api-docs/**",
@@ -43,12 +42,9 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // Permit all requests to the whitelisted public endpoints
                         .requestMatchers(PUBLIC_WHITELIST).permitAll()
-                        // Secure other endpoints based on roles
                         .requestMatchers("/api/v1/internal/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/external/**").hasAnyRole("USER", "ADMIN")
-                        // All other requests must be authenticated
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
