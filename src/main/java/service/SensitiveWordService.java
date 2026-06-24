@@ -3,11 +3,11 @@ package service;
 import dto.WordRequest;
 import dto.WordResponse;
 import entity.SensitiveWord;
+import exceptions.DuplicateWordException;
 import exceptions.ResourceNotFoundException;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import repository.SensitiveWordRepository;
 
@@ -42,7 +42,7 @@ public class SensitiveWordService {
     @Transactional
     public WordResponse addWord(@Valid WordRequest request) {
         if (repository.existsByWordIgnoreCase(request.word())) {
-            throw new DataIntegrityViolationException("Word exists");
+            throw new DuplicateWordException("Word exists");
         }
         SensitiveWord saved = repository.save(new SensitiveWord(request.word()));
         refreshPatternCache();
@@ -68,7 +68,7 @@ public class SensitiveWordService {
 
         if (!existingWord.getWord().equalsIgnoreCase(request.word()) &&
                 repository.existsByWordIgnoreCase(request.word())) {
-            throw new DataIntegrityViolationException("Conflict: The word '" + request.word() + "' already exists.");
+            throw new DuplicateWordException("Conflict: The word '" + request.word() + "' already exists.");
         }
 
         existingWord.setWord(request.word());
