@@ -28,13 +28,12 @@ public class SensitiveWordService {
     public void refreshPatternCache() {
         List<String> words = repository.findAll().stream()
                 .map(SensitiveWord::getWord)
-                .map(Pattern::quote) // Escape special characters
+                .map(Pattern::quote)
                 .toList();
 
         if (words.isEmpty()) {
             compiledPattern = null;
         } else {
-            // Creates a pattern like: (?i)\b(SELECT|DROP|UPDATE)\b
             String regex = "(?i)\\b(" + String.join("|", words) + ")\\b";
             compiledPattern = Pattern.compile(regex);
         }
@@ -67,7 +66,6 @@ public class SensitiveWordService {
         SensitiveWord existingWord = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Word not found with ID: " + id));
 
-        // Ensure we aren't updating it to a word that already exists elsewhere in the DB
         if (!existingWord.getWord().equalsIgnoreCase(request.word()) &&
                 repository.existsByWordIgnoreCase(request.word())) {
             throw new DataIntegrityViolationException("Conflict: The word '" + request.word() + "' already exists.");
@@ -76,7 +74,6 @@ public class SensitiveWordService {
         existingWord.setWord(request.word());
         SensitiveWord updated = repository.save(existingWord);
 
-        // CRITICAL: Rebuild the regex cache so the new word is immediately censored
         refreshPatternCache();
 
         return new WordResponse(updated.getId(), updated.getWord());
@@ -98,7 +95,6 @@ public class SensitiveWordService {
         StringBuilder result = new StringBuilder();
 
         while (matcher.find()) {
-            // Replace match with asterisks of the same length to "bloop" it out
             matcher.appendReplacement(result, "*".repeat(matcher.group().length()));
         }
         matcher.appendTail(result);
