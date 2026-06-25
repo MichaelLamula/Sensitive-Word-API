@@ -15,5 +15,4 @@ public class SensitveWordsApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SensitveWordsApplication.class, args);
 	}
-
 }
