@@ -1,22 +1,37 @@
 package exceptions;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 
+import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-@RestControllerAdvice
+@ControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleNotFound(ResourceNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+
+    @ExceptionHandler(DuplicateWordException.class)
+    public ResponseEntity<Object> handleDuplicateWordException(
+            DuplicateWordException ex, WebRequest request) {
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
     }
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Map<String, String>> handleDuplicate(DataIntegrityViolationException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "Word already exists."));
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Object> handleResourceNotFoundException(
+            ResourceNotFoundException ex, WebRequest request) {
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 }
